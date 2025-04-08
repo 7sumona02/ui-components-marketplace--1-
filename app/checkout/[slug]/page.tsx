@@ -81,7 +81,6 @@ export default function CheckoutPage({ params }: { params: { slug: string } }) {
   const router = useRouter()
   const [component, setComponent] = useState<Component | null>(null)
   const [email, setEmail] = useState("")
-  const [paymentProof, setPaymentProof] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -103,19 +102,13 @@ export default function CheckoutPage({ params }: { params: { slug: string } }) {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setPaymentProof(e.target.files[0])
-    }
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!email || !paymentProof) {
+    if (!email) {
       toast({
         title: "Error",
-        description: "Please fill all required fields",
+        description: "Please fill in your email address",
         variant: "destructive",
       })
       return
@@ -129,8 +122,8 @@ export default function CheckoutPage({ params }: { params: { slug: string } }) {
       formData.append('componentId', (component._id || component.id || '').toString())
       formData.append('componentTitle', component.title)
       formData.append('price', component.price.toString())
-      formData.append('paymentProof', paymentProof)
       formData.append('notes', (e.target as HTMLFormElement).notes.value)
+      formData.append('paymentProofUrl', 'https://twitter.com/weebdev_san')
 
       const response = await fetch('/api/orders', {
         method: 'POST',
@@ -230,9 +223,24 @@ export default function CheckoutPage({ params }: { params: { slug: string } }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="payment-proof">Payment Proof</Label>
-                  <Input id="payment-proof" type="file" accept="image/*" onChange={handleFileChange} required />
-                  <p className="text-xs text-gray-500">Please upload a screenshot of your payment confirmation.</p>
+                  <Label>Payment Proof</Label>
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+                    <p className="text-sm text-blue-800">
+                      Please send your payment proof to{' '}
+                      <a 
+                        href="https://twitter.com/weebdev_san" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="font-medium text-blue-600 hover:underline"
+                      >
+                        @weebdev_san
+                      </a>
+                      {' '}on Twitter after making the payment.
+                    </p>
+                    <p className="text-sm text-blue-800 mt-2">
+                      Include your email address ({email}) in the message for reference.
+                    </p>
+                  </div>
                 </div>
 
                 <div className="space-y-2">

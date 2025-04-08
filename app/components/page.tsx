@@ -64,7 +64,7 @@ async function getComponents() {
 
   try {
     await client.connect();
-    const database = client.db('marketplace');
+    const database = client.db('my-store');
     const components = database.collection('components');
     return await components.find({}).toArray();
   } finally {

@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     await client.db("admin").command({ ping: 1 })
     console.log("Successfully connected to MongoDB.")
     
-    const database = client.db('marketplace')
+    const database = client.db('my-store')
     const payments = database.collection('payments')
 
     // Parse the request body

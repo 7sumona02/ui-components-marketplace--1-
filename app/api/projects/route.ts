@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     // Connect to MongoDB
     await client.connect();
-    const database = client.db('marketplace');
+    const database = client.db('my-store');
     const components = database.collection('components');
 
     // Prepare data for MongoDB

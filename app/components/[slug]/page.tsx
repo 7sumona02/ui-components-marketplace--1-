@@ -289,7 +289,7 @@ async function getComponent(id: string): Promise<ComponentFeatures | MongoDBComp
 
   try {
     await client.connect();
-    const database = client.db('marketplace');
+    const database = client.db('my-store');
     const componentsCollection = database.collection<MongoDBComponent>('components');
     
     try {
