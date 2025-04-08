@@ -1,8 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -56,17 +54,47 @@ const components = {
 // UPI ID - This would be your actual PhonePe UPI ID
 const UPI_ID = "your-phonepe@upi"
 
+interface Component {
+  _id?: string
+  id?: string
+  title: string
+  price: number
+  image: string
+}
+
+// Fetch component function
+async function fetchComponent(slug: string): Promise<Component | null> {
+  try {
+    const response = await fetch(`/api/components/${slug}`);
+    if (!response.ok) {
+      // If not found in MongoDB, check static components
+      return components[slug as keyof typeof components] || null;
+    }
+    return await response.json();
+  } catch (error) {
+    // Fallback to static components
+    return components[slug as keyof typeof components] || null;
+  }
+}
+
 export default function CheckoutPage({ params }: { params: { slug: string } }) {
   const router = useRouter()
+  const [component, setComponent] = useState<Component | null>(null)
   const [email, setEmail] = useState("")
   const [paymentProof, setPaymentProof] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  const component = components[params.slug as keyof typeof components]
+  useEffect(() => {
+    fetchComponent(params.slug).then(comp => {
+      if (comp) {
+        setComponent(comp)
+      }
+    })
+  }, [params.slug])
 
   if (!component) {
-    return <div className="container py-12 text-center">Component not found</div>
+    return <div className="container py-12 text-center">Loading...</div>
   }
 
   const handleCopyUPI = () => {
