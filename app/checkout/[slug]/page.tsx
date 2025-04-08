@@ -112,19 +112,10 @@ export default function CheckoutPage({ params }: { params: { slug: string } }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!email) {
+    if (!email || !paymentProof) {
       toast({
         title: "Error",
-        description: "Please enter your email address",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (!paymentProof) {
-      toast({
-        title: "Error",
-        description: "Please upload payment proof",
+        description: "Please fill all required fields",
         variant: "destructive",
       })
       return
@@ -132,12 +123,35 @@ export default function CheckoutPage({ params }: { params: { slug: string } }) {
 
     setIsSubmitting(true)
 
-    // In a real application, you would upload the file to your server here
-    // For this example, we'll simulate a successful upload
-    setTimeout(() => {
-      setIsSubmitting(false)
+    try {
+      const formData = new FormData()
+      formData.append('email', email)
+      formData.append('componentId', (component._id || component.id || '').toString())
+      formData.append('componentTitle', component.title)
+      formData.append('price', component.price.toString())
+      formData.append('paymentProof', paymentProof)
+      formData.append('notes', (e.target as HTMLFormElement).notes.value)
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to submit order')
+      }
+
+      const data = await response.json()
       router.push(`/success?email=${encodeURIComponent(email)}&component=${encodeURIComponent(component.title)}`)
-    }, 1500)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit order. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
